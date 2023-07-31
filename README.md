@@ -103,3 +103,9 @@ If you don't have an OpenAI API key, you can get one [here](https://platform.ope
 If you have any questions, feel free to reach out to Mckay on [Twitter](https://twitter.com/mckaywrigley).
 
 [GCSE]: https://developers.google.com/custom-search/v1/overview
+
+
+
+## Azure OpenAI OpenAPI Specification
+
+- https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/stable/2023-05-15/inference.json
