@@ -44,6 +44,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-hot-toast';
 import { ChatCompletionResponseMessageRoleEnum } from 'openai';
 
+import { loginRequest } from '@/services/authConfigService';
+import { useIsAuthenticated, useMsal, MsalAuthenticationTemplate } from '@azure/msal-react';
+import { InteractionStatus, InteractionType } from '@azure/msal-browser';
+
 interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
@@ -55,6 +59,11 @@ const Home = ({
   serverSidePluginKeysSet,
   defaultModelId,
 }: Props) => {
+
+
+   const isAuthenticated = useIsAuthenticated();
+   const { instance, inProgress } = useMsal();
+
   const { t } = useTranslation('chat');
   const { getModels } = useApiService();
   const { getModelsError } = useErrorService();
@@ -84,12 +93,29 @@ const Home = ({
     ({ signal }) => {
       if (!apiKey && !serverSideApiKeyIsSet) return null;
 
-      return getModels(
-        {
-          key: apiKey,
-        },
-        signal,
-      );
+      instance.acquireTokenSilent({
+        ...loginRequest,
+        account: instance.getActiveAccount() ?? undefined,
+      }).then((response) => {
+        return getModels(
+          {
+            key: apiKey,
+            accessToken: response.accessToken
+          },
+          signal,
+        );
+
+      }).catch((error) => {
+        console.log('acquireTokenSilent error', error)
+      });
+
+      // return getModels(
+      //   {
+      //     key: apiKey,
+      //     accessToken: 'asdasdasd'
+      //   },
+      //   signal,
+      // );
     },
     { enabled: true, refetchOnMount: false },
   );
@@ -261,6 +287,7 @@ const Home = ({
   }
 
   useEffect(() => {
+    if (isAuthenticated) {
       toast.loading((t) => (
         <div>
           <h1 className={`font-bold text-5xl text-center pb-12`}>Notice</h1>
@@ -294,7 +321,10 @@ const Home = ({
             'aria-live': 'polite',
           },
         });
-  }, []);
+      }
+  }, [isAuthenticated]);
+
+
 
 
   useEffect(() => {
@@ -394,6 +424,18 @@ const Home = ({
     serverSidePluginKeysSet,
   ]);
 
+  const authRequest = {
+    ...loginRequest
+  }
+
+  const ErrorComponent = (error: any) => {
+    return <h1 className="text-xl text-red">An Error Occurred: {error.errorCode}</h1>;
+  }
+
+  const Loading = () => {
+      return <h1 className="text-xl text-white">Authentication in progress...</h1>
+  }
+
   return (
     <HomeContext.Provider
       value={{
@@ -415,6 +457,7 @@ const Home = ({
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <MsalAuthenticationTemplate interactionType={InteractionType.Redirect} authenticationRequest={authRequest} errorComponent={ErrorComponent} loadingComponent={Loading}>
       {selectedConversation && (
         <main
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
@@ -437,6 +480,7 @@ const Home = ({
           </div>
         </main>
       )}
+      </MsalAuthenticationTemplate>
     </HomeContext.Provider>
   );
 };

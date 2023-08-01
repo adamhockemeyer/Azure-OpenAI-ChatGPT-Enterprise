@@ -19,3 +19,12 @@ export const OPENAI_ORGANIZATION =
 
 export const AZURE_DEPLOYMENT_ID =
   process.env.AZURE_DEPLOYMENT_ID || '';
+
+export const AZURE_AD_CLIENTID = 
+  process.env.NEXT_PUBLIC_AZURE_AD_CLIENTID || '';
+
+export const AZURE_AD_TENANTID =
+  process.env.NEXT_PUBLIC_AZURE_AD_TENANTID || '';
+
+export const AZURE_AD_REDIRECT_URI =  
+  process.env.NEXT_PUBLIC_AZURE_AD_REDIRECT_URI || '';

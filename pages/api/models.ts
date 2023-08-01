@@ -1,6 +1,17 @@
-import { OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION } from '@/utils/app/const';
+import { OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION, AZURE_AD_CLIENTID } from '@/utils/app/const';
 
 import { OpenAIModel, OpenAIModelID, OpenAIModels } from '@/types/openai';
+
+//  import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+// import { use } from 'react';
+// import { loginRequest } from '@/services/authConfigService';
+
+// const { instance } = useMsal();
+//const  isAuthenticated  = useIsAuthenticated();
+
+//import { msalInstance, loginRequest } from '@/services/authConfigService';
+
+
 
 export const config = {
   runtime: 'edge',
@@ -11,6 +22,19 @@ const handler = async (req: Request): Promise<Response> => {
     const { key } = (await req.json()) as {
       key: string;
     };
+
+    const accessToken = await req.headers.get('Authorization');
+
+    console.log('accessToken123', accessToken);
+
+  
+
+    // const tokenResponse = await msalInstance.acquireTokenSilent({
+    //   ...loginRequest,
+    //   account: msalInstance.getActiveAccount() || undefined,
+    // });
+
+    // console.log('tokenResponse', tokenResponse);
 
     let url = `${OPENAI_API_HOST}/v1/models`;
     if (OPENAI_API_TYPE === 'azure') {
@@ -26,11 +50,16 @@ const handler = async (req: Request): Promise<Response> => {
         ...(OPENAI_API_TYPE === 'azure' && {
           'api-key': `${key ? key : process.env.OPENAI_API_KEY}`
         }),
+        ...(AZURE_AD_CLIENTID && {
+          Authorization: `Bearer ${accessToken ? accessToken : 'NOT_SET'}`
+        }),
         ...((OPENAI_API_TYPE === 'openai' && OPENAI_ORGANIZATION) && {
           'OpenAI-Organization': OPENAI_ORGANIZATION,
         }),
       },
     });
+
+    console.log('response', response.headers);
 
     if (response.status === 401) {
       return new Response(response.body, {
