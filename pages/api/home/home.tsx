@@ -41,6 +41,9 @@ import { HomeInitialState, initialState } from './home.state';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { toast } from 'react-hot-toast';
+import { ChatCompletionResponseMessageRoleEnum } from 'openai';
+
 interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
@@ -249,6 +252,50 @@ const Home = ({
   }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
   // ON LOAD --------------------------------------------
+
+  const [showTerms, setShowTerms] = useState<boolean>(false);
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+
+  const terms = () => {
+    return false;
+  }
+
+  useEffect(() => {
+      toast.loading((t) => (
+        <div>
+          <h1 className={`font-bold text-5xl text-center pb-12`}>Notice</h1>
+          <div className={`py-5 border-t border-b border-gray-300`}>
+            <p>Before using our Enterprise ChatGPT, you must complete the <a className={`text-sky-400`} href='https://learn.microsoft.com/en-us/training/modules/explore-azure-openai/'>Introduction to Azure OpenAI Service</a> course.</p>
+          </div>
+          <div className={`flex justify-end py-10`}>
+            <button className={`px-5 py-2 bg-indigo-500 hover:bg-indigo-700 text-white cursor-pointer rounded-md`} onClick={() => {toast.dismiss(t.id); }}>Confirm</button>
+          </div>
+        </div>), {
+      
+          position: 'bottom-center',
+          
+        
+          // Styling
+          style: {  },
+          className: '',
+        
+          // Custom Icon
+          icon: '⚠️',
+        
+          // Change colors of success/error/loading icon
+          iconTheme: {
+            primary: '#000',
+            secondary: '#fff',
+          },
+        
+          // Aria
+          ariaProps: {
+            role: 'status',
+            'aria-live': 'polite',
+          },
+        });
+  }, []);
+
 
   useEffect(() => {
     const settings = getSettings();
