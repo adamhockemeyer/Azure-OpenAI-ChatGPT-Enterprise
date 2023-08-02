@@ -88,34 +88,25 @@ const Home = ({
 
   const stopConversationRef = useRef<boolean>(false);
 
+
+
   const { data, error, refetch } = useQuery(
     ['GetModels', apiKey, serverSideApiKeyIsSet],
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!apiKey && !serverSideApiKeyIsSet) return null;
 
-      instance.acquireTokenSilent({
+      const tokenResponse = await instance.acquireTokenSilent({
         ...loginRequest,
         account: instance.getActiveAccount() ?? undefined,
-      }).then((response) => {
+      });
+
         return getModels(
           {
             key: apiKey,
-            accessToken: response.accessToken
+            accessToken: tokenResponse?.accessToken,
           },
           signal,
         );
-
-      }).catch((error) => {
-        console.log('acquireTokenSilent error', error)
-      });
-
-      // return getModels(
-      //   {
-      //     key: apiKey,
-      //     accessToken: 'asdasdasd'
-      //   },
-      //   signal,
-      // );
     },
     { enabled: true, refetchOnMount: false },
   );
@@ -323,8 +314,6 @@ const Home = ({
         });
       }
   }, [isAuthenticated]);
-
-
 
 
   useEffect(() => {

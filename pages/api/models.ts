@@ -25,17 +25,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     const accessToken = await req.headers.get('Authorization');
 
-    console.log('accessToken123', accessToken);
-
-  
-
-    // const tokenResponse = await msalInstance.acquireTokenSilent({
-    //   ...loginRequest,
-    //   account: msalInstance.getActiveAccount() || undefined,
-    // });
-
-    // console.log('tokenResponse', tokenResponse);
-
     let url = `${OPENAI_API_HOST}/v1/models`;
     if (OPENAI_API_TYPE === 'azure') {
       url = `${OPENAI_API_HOST}/openai/deployments?api-version=${OPENAI_API_VERSION}`;
@@ -59,20 +48,20 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    console.log('response', response.headers);
-
     if (response.status === 401) {
       return new Response(response.body, {
         status: 500,
         headers: response.headers,
       });
     } else if (response.status !== 200) {
-      console.error(
-        `OpenAI API returned an error ${
-          response.status
-        }: ${await response.text()}`,
-      );
-      throw new Error('OpenAI API returned an error');
+      // console.error(
+      //   `OpenAI API returned an error ${
+      //     response.status
+      //   }: ${await response.text()}`,
+      // );
+      throw new Error(`OpenAI API returned an error ${
+        response.status
+      }: ${await response.text()}`);
     }
 
     const json = await response.json();
@@ -93,8 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify(models), { status: 200 });
   } catch (error) {
-    console.error(error);
-    return new Response('Error', { status: 500 });
+    console.error('model error:',error);
+    return new Response('Error', { status: 500, statusText: error as string });
   }
 };
 

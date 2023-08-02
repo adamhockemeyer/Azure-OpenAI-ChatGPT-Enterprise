@@ -29,6 +29,7 @@ export const OpenAIStream = async (
   temperature : number,
   key: string,
   messages: Message[],
+  oAuthToken?: string
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   if (OPENAI_API_TYPE === 'azure') {
@@ -42,6 +43,9 @@ export const OpenAIStream = async (
       }),
       ...(OPENAI_API_TYPE === 'azure' && {
         'api-key': `${key ? key : process.env.OPENAI_API_KEY}`
+      }),
+      ...(oAuthToken && {
+        Authorization: `${oAuthToken ? oAuthToken : 'NOT_SET'}`
       }),
       ...((OPENAI_API_TYPE === 'openai' && OPENAI_ORGANIZATION) && {
         'OpenAI-Organization': OPENAI_ORGANIZATION,
@@ -68,18 +72,27 @@ export const OpenAIStream = async (
 
   if (res.status !== 200) {
     const result = await res.json();
+    const headers = await res.headers
+    console.log(headers);
     if (result.error) {
+      console.log('serser/index.ts 1: OpenAIStream: result: ', result);
       throw new OpenAIError(
         result.error.message,
         result.error.type,
         result.error.param,
         result.error.code,
       );
-    } else {
+    } else if(headers.has('errorsource')) {
+      console.log('serser/index.ts 2: OpenAIStream: result: ', result);
       throw new Error(
-        `OpenAI API returned an error: ${
-          decoder.decode(result?.value) || result.statusText
-        }`,
+        `Error via APIM Policy (${headers.get('errorsource')}): ${ result.message }`
+      );
+    }
+    else
+    {
+      console.log('serser/index.ts 3: OpenAIStream: result: ', result);
+      throw new Error(
+        `Error: Getting Results from OpenAI API.`
       );
     }
   }

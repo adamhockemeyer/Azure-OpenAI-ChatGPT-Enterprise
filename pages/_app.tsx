@@ -12,13 +12,15 @@ import '@/styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-msalInstance.handleRedirectPromise().then((result) => {
-  console.log('handleRedirectPromise', result)
-  if(result?.account) 
-    {
-      msalInstance.setActiveAccount(result?.account);
-    }
-});
+
+
+// msalInstance.handleRedirectPromise().then((result) => {
+//   console.log('handleRedirectPromise', result)
+//   if(result?.account) 
+//     {
+//       msalInstance.setActiveAccount(result?.account);
+//     }
+// });
 
 function App({ Component, pageProps }: AppProps<{}>) {
   const queryClient = new QueryClient();

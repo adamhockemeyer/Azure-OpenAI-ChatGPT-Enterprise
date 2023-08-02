@@ -53,6 +53,13 @@ const msalInstance = new msal.PublicClientApplication(msalConfig);
 
 export { msalInstance }
 
+msalInstance.addEventCallback((event: any) => {
+    if(event.eventType === msal.EventType.LOGIN_SUCCESS) {
+        msalInstance.setActiveAccount(event.payload.account);
+        console.log("LOGIN_SUCCESS", event.payload.account);
+    }
+});
+
 /**
  * Scopes you add here will be prompted for user consent during sign-in.
  * By default, MSAL.js will add OIDC scopes (openid, profile, email) to any login request.

@@ -34,11 +34,18 @@ import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 
+import { loginRequest } from '@/services/authConfigService';
+import { useIsAuthenticated, useMsal, MsalAuthenticationTemplate } from '@azure/msal-react';
+import { AZURE_AD_CLIENTID } from '@/utils/app/const';
+
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
+  const isAuthenticated = useIsAuthenticated();
+  const { instance, inProgress } = useMsal();
+
   const { t } = useTranslation('chat');
 
   const {
@@ -116,10 +123,25 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           });
         }
         const controller = new AbortController();
+
+        let tokenResponse = null;
+        if(AZURE_AD_CLIENTID)
+        {
+          tokenResponse = await instance.acquireTokenSilent({
+            ...loginRequest,
+            account: instance.getActiveAccount() || undefined
+          });
+
+          console.log('acquired AD token for chat');
+        }
+
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(tokenResponse && {
+              Authorization: `${tokenResponse?.accessToken ? tokenResponse.accessToken : 'NOT_SET'}`
+            }),
           },
           signal: controller.signal,
           body,
@@ -127,7 +149,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error(response.statusText);
+          toast.error(response.statusText, { duration: 8000});
+
           return;
         }
         const data = response.body;
