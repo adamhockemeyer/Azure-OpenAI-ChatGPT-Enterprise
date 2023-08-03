@@ -10,6 +10,7 @@ const useErrorService = () => {
   return {
     getModelsError: useMemo(
       () => (error: any) => {
+        console.error(error);
         return !error
           ? null
           : ({

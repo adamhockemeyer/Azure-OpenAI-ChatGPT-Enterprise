@@ -36,6 +36,7 @@ export const OpenAIStream = async (
     url = `${OPENAI_API_HOST}/openai/deployments/${AZURE_DEPLOYMENT_ID}/chat/completions?api-version=${OPENAI_API_VERSION}`;
   }
   const res = await fetch(url, {
+    signal: AbortSignal.timeout(15000),
     headers: {
       'Content-Type': 'application/json',
       ...(OPENAI_API_TYPE === 'openai' && {
@@ -75,7 +76,7 @@ export const OpenAIStream = async (
     const headers = await res.headers
     console.log(headers);
     if (result.error) {
-      console.log('serser/index.ts 1: OpenAIStream: result: ', result);
+      //console.log('serser/index.ts 1: OpenAIStream: result: ', result);
       throw new OpenAIError(
         result.error.message,
         result.error.type,
@@ -83,7 +84,7 @@ export const OpenAIStream = async (
         result.error.code,
       );
     } else if(headers.has('errorsource')) {
-      console.log('serser/index.ts 2: OpenAIStream: result: ', result);
+      //console.log('serser/index.ts 2: OpenAIStream: result: ', result);
       throw new Error(
         `Error via APIM Policy (${headers.get('errorsource')}): ${ result.message }`
       );
