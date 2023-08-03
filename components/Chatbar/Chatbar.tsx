@@ -26,6 +26,8 @@ import { ChatbarInitialState, initialState } from './Chatbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
 
+
+
 export const Chatbar = () => {
   const { t } = useTranslation('sidebar');
 
@@ -219,6 +221,9 @@ export const Chatbar = () => {
         handleApiKeyChange,
       }}
     >
+
+                
+
       <Sidebar<Conversation>
         side={'left'}
         isOpen={showChatbar}
