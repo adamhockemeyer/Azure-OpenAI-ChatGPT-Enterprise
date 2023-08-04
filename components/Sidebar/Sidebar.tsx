@@ -61,7 +61,7 @@ const Sidebar = <T,>({
         className={`fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#202123] p-2 text-[14px] transition-all sm:relative sm:top-0`}
       >
         {side === 'left' && (
-          <Image height={500} width={500} src="/image/logo.png" className="w-40 mx-auto" alt="logo" />
+          <img height={500} width={500} src="/image/logo.png" className="w-40 mx-auto" alt="logo" />
         )}
         <div className="flex items-center">
           <button
